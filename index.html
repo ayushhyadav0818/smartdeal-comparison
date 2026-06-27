@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartDeal - Real-Time Price Comparison Engine</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom Styling -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <i data-lucide="sparkles" class="brand-icon"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Smart<span>Deal</span></h1>
+          <p>Real-Time Aggregator</p>
+        </div>
+      </div>
+      
+      <div class="connection-status">
+        <span class="pulse-dot"></span>
+        <span class="status-label">Live Comparing: Amazon, Flipkart, Myntra, Ajio, Brand Stores</span>
+      </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="search-section">
+      <div class="search-title">
+        <h2>Find the Absolute Best Deal Instantly</h2>
+        <p>Enter any model, brand, or product name to compare live prices, delivery, and active coupon codes.</p>
+      </div>
+      
+      <div class="search-container">
+        <div class="search-box-wrapper">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="search-input" placeholder="Search for iPhone 15 Pro, Sony Headphones, Nike shoes..." autocomplete="off">
+          <button id="search-clear-btn" class="clear-btn">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <button id="search-submit-btn" class="search-btn">
+          Compare Deals
+        </button>
+        
+        <!-- Autocomplete dropdown -->
+        <div class="search-suggestions" id="suggestions-box"></div>
+      </div>
+      
+      <!-- Category Quick Filters -->
+      <div class="category-filters">
+        <button class="cat-chip active" data-category="all">
+          <i data-lucide="layers"></i> All Deals
+        </button>
+        <button class="cat-chip" data-category="electronics">
+          <i data-lucide="laptop"></i> Electronics
+        </button>
+        <button class="cat-chip" data-category="footwear">
+          <i data-lucide="footprints"></i> Footwear
+        </button>
+        <button class="cat-chip" data-category="apparel">
+          <i data-lucide="shirt"></i> Fashion & Apparel
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Comparison Output Dashboard (Initially Hidden or showing demo) -->
+    <main class="comparison-dashboard" id="comparison-view">
+      
+      <!-- Split-screen Top Panel -->
+      <div class="comparison-grid">
+        
+        <!-- Left: Selected Product Showcase Card -->
+        <div class="product-showcase-panel glass-panel animate-fade-in">
+          <div class="product-header">
+            <span class="category-badge" id="prod-category">Electronics</span>
+            <div class="rating-badge">
+              <i data-lucide="star"></i>
+              <span id="prod-rating">4.8</span>
+            </div>
+          </div>
+          
+          <div class="product-image-container">
+            <img src="" alt="Product Image" id="prod-image">
+            <div class="glow-shadow"></div>
+          </div>
+          
+          <div class="product-details">
+            <h3 id="prod-title">Product Name Placeholder</h3>
+            <p id="prod-desc">Detailed specs and attributes will load here dynamically based on the current product selected.</p>
+          </div>
+          
+          <!-- Coupon Highlight Card -->
+          <div class="coupon-highlight-card">
+            <div class="coupon-header">
+              <i data-lucide="ticket"></i>
+              <span>Active Coupon Applied</span>
+            </div>
+            <div class="coupon-body">
+              <div class="coupon-code" id="coupon-code-text">DEAL10</div>
+              <div class="coupon-savings" id="coupon-savings-text">Extra $15.00 Off at checkout</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right: Platform Price Comparison List -->
+        <div class="deals-matrix-panel glass-panel animate-fade-in-delayed">
+          <div class="panel-header">
+            <h3>Live Pricing Comparison</h3>
+            <span class="update-timer" id="update-timer">Checked: Just Now</span>
+          </div>
+          
+          <div class="deals-list" id="deals-list-container">
+            <!-- Platform deal cards will render here dynamically via JS -->
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Split-screen Bottom Panel: Chart & Alert Setup -->
+      <div class="analytics-grid">
+        
+        <!-- Left: Price History Line Chart -->
+        <div class="chart-panel glass-panel animate-fade-in">
+          <div class="panel-header">
+            <div class="header-group">
+              <h3>30-Day Price Trend</h3>
+              <p>Verify if today's deal is historically optimal or inflated</p>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="price-history-chart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Right: Smart Value Breakdown & Alert Panel -->
+        <div class="smart-alert-panel glass-panel animate-fade-in-delayed">
+          <h3>Value Assessment Engine</h3>
+          
+          <div class="value-score-container">
+            <div class="score-radial">
+              <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="circle" id="score-circle" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div class="score-text">
+                <span class="score-number" id="deal-score">8.5</span>
+                <span class="score-max">/10</span>
+              </div>
+            </div>
+            <div class="value-text-details">
+              <h4 id="deal-verdict">Excellent Buy</h4>
+              <p id="deal-savings-summary">Cheapest price is 15% lower than the official manufacturer catalog price.</p>
+            </div>
+          </div>
+          
+          <div class="alert-form-box">
+            <h4>Set Price Drop Alert</h4>
+            <p>We'll email you immediately if the price falls below your threshold.</p>
+            <div class="alert-inputs">
+              <input type="number" id="alert-price" placeholder="Target Price ($)">
+              <input type="email" id="alert-email" placeholder="Your Email">
+              <button id="alert-submit-btn">Set Alert</button>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+    </main>
+    
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2026 SmartDeal comparison framework. Synthesized live rates. Optimized for Vercel deployment.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Initialize icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
